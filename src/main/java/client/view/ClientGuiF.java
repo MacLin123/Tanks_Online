@@ -2,7 +2,6 @@ package client.view;
 
 import client.model.*;
 import config.Config;
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
 import javax.swing.*;
 import java.awt.*;
@@ -124,7 +123,7 @@ public class ClientGuiF extends JFrame implements ActionListener, WindowListener
         JOptionPane.showConfirmDialog(this,
                 "leaving so soon?", "Tanks_Online",
                 JOptionPane.YES_NO_OPTION);
-        BClient.getInstance().sendToServer(new MsgProtocol().ExitMessagePacket(tank.getTankID()));
+        BClient.getInstance().sendToServer(new MsgProtocol().exitMessagePacket(tank.getTankID()));
     }
 
     public void windowClosed(WindowEvent e) {

@@ -24,7 +24,7 @@ public class Client {
         cs = new Socket(Ip, port);
         dos = new DataOutputStream(cs.getOutputStream());
 
-        dos.writeUTF(msgProtocol.RegisterPacket(posX, posY));
+        dos.writeUTF(msgProtocol.connectPacket(posX, posY));
 
 
     }

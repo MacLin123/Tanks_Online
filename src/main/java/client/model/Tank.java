@@ -8,8 +8,8 @@ import java.util.Random;
 public class Tank {
     private Image[] tankImg;
     private BufferedImage imgBuf;
-    private final int RED_TANK_IND = 0;
-    private final int BLUE_TANK_IND = 4;
+    //    private final int RED_TANK_IND = 0;
+//    private final int BLUE_TANK_IND = 4;
     private int tankID;
     private int posX = -1, posY = -1;
     private int direction = 1;
@@ -20,20 +20,23 @@ public class Tank {
 
     public Tank() {
         initCoordRandom();
-        loadImage(BLUE_TANK_IND);
+        loadImage(4);
     }
 
     public Tank(int x, int y, int dir, int id) {
-        if (x < minXpos || y < minYpos || y > maxYPos || x > maxXpos) {
-            initCoordRandom();
-        }
-        loadImage(RED_TANK_IND);
+        posX = x;
+        posY = y;
+        tankID = id;
+        direction = dir;
+        loadImage(0);
     }
 
     public void initCoordRandom() {
         Random random = new Random();
         posX = random.nextInt(maxXpos - minXpos) + minXpos;
         posY = random.nextInt(maxYPos - minYpos) + minYpos;
+
+        //CheckCollision??
     }
 
     public void loadImage(int val) {
