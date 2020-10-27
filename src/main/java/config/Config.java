@@ -1,6 +1,7 @@
 package config;
 
 public class Config {
+    public static final int MAX_PLAYERS = 4;
     public enum typesClientMsg {
         CONNECT("Connect"),
         UPDATE("Update"),

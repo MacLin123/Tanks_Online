@@ -1,8 +1,8 @@
 package client.view;
 
-import client.model.BClient;
-import client.model.Client;
-import client.model.MsgProtocol;
+import client.model.*;
+import config.Config;
+import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,7 +10,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.DataInputStream;
 import java.io.IOException;
+import java.net.Socket;
 
 public class ClientGuiF extends JFrame implements ActionListener, WindowListener {
     private JButton connectBtn;
@@ -24,6 +26,9 @@ public class ClientGuiF extends JFrame implements ActionListener, WindowListener
     private int width = 800, height = 600;
     private int xLoc = 60, yLoc = 100;
     private int score = 0;
+    private boolean isRunning = true;
+    private GameArena gameArena;
+    private Tank tank;
 
     public ClientGuiF() {
         setTitle("Tanks_Online");
@@ -64,17 +69,20 @@ public class ClientGuiF extends JFrame implements ActionListener, WindowListener
         connectBtn.addActionListener(this);
         connectBtn.setFocusable(true);
 
-        client = BClient.getInstance();
-        //tanks...
-        //game arena...
-
         mainPanel.add(ipLabel);
         mainPanel.add(portLabel);
         mainPanel.add(scoreLabel);
         mainPanel.add(ipText);
         mainPanel.add(portText);
         mainPanel.add(connectBtn);
+
+        client = BClient.getInstance();
+        tank = new Tank();
+        gameArena = new GameArena(tank, client, false);
+
         getContentPane().add(mainPanel);
+        getContentPane().add(gameArena);
+
         setVisible(true);
     }
 
@@ -86,24 +94,25 @@ public class ClientGuiF extends JFrame implements ActionListener, WindowListener
         Object obj = e.getSource();
         if (obj == connectBtn) {
             connectBtn.setEnabled(false);
-            // handling...
-            //posX posY dummy
             try {
-                client.connect(ipText.getText(),Integer.parseInt(portText.getText()),4,4);
+                client.connect(ipText.getText(), Integer.parseInt(portText.getText()),
+                        tank.getPosX(), tank.getPosY());
+                gameArena.setGameRunning(true);
+                gameArena.repaint();
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                }
+
+                new ClientReciever(client.getSocket()).start();
+                connectBtn.setFocusable(false);
+                gameArena.setFocusable(true);
+
             } catch (IOException ioException) {
                 System.out.println(ioException.getMessage());
+                connectBtn.setEnabled(true);
             }
-
-            /*
-            GameArena
-            TODO
-             */
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException ex) {
-                ex.printStackTrace();
-            }
-            connectBtn.setFocusable(true);
         }
     }
 
@@ -115,7 +124,7 @@ public class ClientGuiF extends JFrame implements ActionListener, WindowListener
         JOptionPane.showConfirmDialog(this,
                 "leaving so soon?", "Tanks_Online",
                 JOptionPane.YES_NO_OPTION);
-//        BClient.getInstance().sendToServer(new MsgProtocol().ExitMessagePacket("zaplatka"));
+        BClient.getInstance().sendToServer(new MsgProtocol().ExitMessagePacket(tank.getTankID()));
     }
 
     public void windowClosed(WindowEvent e) {
@@ -136,5 +145,53 @@ public class ClientGuiF extends JFrame implements ActionListener, WindowListener
 
     public void windowDeactivated(WindowEvent e) {
 
+    }
+
+    public class ClientReciever extends Thread {
+        Socket clientSoc;
+        DataInputStream dis;
+
+        public ClientReciever(Socket clientSoc) {
+            this.clientSoc = clientSoc;
+            try {
+                dis = new DataInputStream(clientSoc.getInputStream());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public void run() {
+            String msgStr = "";
+            while (isRunning) {
+                try {
+                    msgStr = dis.readUTF();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                System.out.println(msgStr);
+                if (msgStr.startsWith(Config.typesServerMsg.ID.getType())) {
+                    int id = Integer.parseInt(msgStr.substring(2));
+                    tank.setTankID(id);
+                    System.out.println("Tank id = " + id);
+                } else if (msgStr.startsWith(Config.typesServerMsg.NEWCLIENT.getType())) { //new tank
+                    int startPos = Config.typesServerMsg.NEWCLIENT.getType().length();
+                    int pos1 = msgStr.indexOf(',');
+                    int pos2 = msgStr.indexOf('-');
+                    int pos3 = msgStr.indexOf('|');
+                    int x = Integer.parseInt(msgStr.substring(startPos, pos1));
+                    int y = Integer.parseInt(msgStr.substring(pos1 + 1, pos2));
+                    int direction = Integer.parseInt(msgStr.substring(pos2 + 1, pos3));
+                    int id = Integer.parseInt(msgStr.substring(pos3 + 1));
+                    if (id != tank.getTankID())
+                        gameArena.connetNewTank(new Tank(x, y, direction, id));
+                }
+            }
+            try{
+                dis.close();
+                clientSoc.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

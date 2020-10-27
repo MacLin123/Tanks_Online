@@ -34,38 +34,48 @@ public class Server extends Thread {
 
     @Override
     public void run() {
-        Socket cs = null;
+        Socket clientSoc = null;
         String msgStr = null; //from client
-        try {
-            cs = serverSocket.accept();
-            clientDis = new DataInputStream(cs.getInputStream());
-            msgStr = clientDis.readUTF();
+        while (isRunning) {
+            try {
+                clientSoc = serverSocket.accept();
+                clientDis = new DataInputStream(clientSoc.getInputStream());
+                msgStr = clientDis.readUTF();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            System.out.println(msgStr);
+            if (msgStr.startsWith(typesClientMsg.CONNECT.getType())) { // connect packet
+                int pos = msgStr.indexOf(',');
+                int x = Integer.parseInt(msgStr.substring(
+                        typesClientMsg.CONNECT.getType().length(), pos));
+                int y = Integer.parseInt(msgStr.substring(pos + 1));
+
+                try {
+                    clientDos = new DataOutputStream(clientSoc.getOutputStream());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                sendToClient(msgProtocol.getIDPacket(clientDataList.size() + 1));
+                try {
+                    broadcastMsg(msgProtocol.getNewClientPacket(x, y, 1,
+                            clientDataList.size() + 1));
+                    sendAllClientsToSoc(clientDos);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                clientDataList.add(new ClientData(clientDos, x, y, 1));
+            }
+        }
+
+        try { // when stop server
+            clientDis.close();
+            clientDos.close();
+            serverSocket.close();
+            clientSoc.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println(msgStr);
-        if (msgStr.startsWith(typesClientMsg.CONNECT.getType())) { // connect packet
-            int pos = msgStr.indexOf(',');
-            int x = Integer.parseInt(msgStr.substring(
-                    typesClientMsg.CONNECT.getType().length(), pos));
-            int y = Integer.parseInt(msgStr.substring(pos + 1));
-
-            try {
-                clientDos = new DataOutputStream(cs.getOutputStream());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            sendToClient(msgProtocol.getIDPacket(clientDataList.size() + 1));
-            try {
-                broadcastMsg(msgProtocol.getNewClientPacket(x, y, 1,
-                        clientDataList.size() + 1));
-                sendAllClients(clientDos);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            clientDataList.add(new ClientData(clientDos, x, y, 1));
-        }
-
     }
 
     public void sendToClient(String msg) {
@@ -82,12 +92,13 @@ public class Server extends Thread {
 
     public void broadcastMsg(String msg) throws IOException {
         for (int i = 0; i < clientDataList.size(); i++) {
-            if (clientDataList.get(i) != null)
+            if (clientDataList.get(i) != null) {
                 clientDataList.get(i).getWriterStream().writeUTF(msg);
+            }
         }
     }
 
-    public void sendAllClients(DataOutputStream dos) {
+    public void sendAllClientsToSoc(DataOutputStream dos) {
         int x, y, dir;
         for (int i = 0; i < clientDataList.size(); i++) {
             if (clientDataList.get(i) != null) {
@@ -101,6 +112,10 @@ public class Server extends Thread {
                 }
             }
         }
+    }
+
+    public void stopServer() {
+        isRunning = false;
     }
 
     public class ClientData {
