@@ -1,4 +1,9 @@
-package client.model;
+package client.model.controller;
+
+import client.model.BClient;
+import client.model.Client;
+import client.model.MsgProtocol;
+import client.model.Tank;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
