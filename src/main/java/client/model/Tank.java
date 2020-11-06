@@ -23,6 +23,7 @@ public class Tank {
     private int width = 490, height = 510;
     private final int minXpos = 50, minYpos = 60;
     private final int maxXpos = height - minXpos, maxYPos = height - minYpos;
+    private final int TANK_SIZE = 40; //direction == 1
 
     public Tank() {
         initCoordRandom();
@@ -157,55 +158,28 @@ public class Tank {
                 x = tanks.get(i).getPosX();
                 y = tanks.get(i).getPosY();
 
-
+                boolean condition1Y = (yPos <= y + TANK_SIZE) && yPos >= y;
+                boolean condition2Y = (yPos + TANK_SIZE >= y) && yPos + TANK_SIZE <= y + TANK_SIZE;
+                boolean condition1X = xPos <= x + TANK_SIZE && xPos >= x;
+                boolean condition2X = xPos + TANK_SIZE >= x && xPos + TANK_SIZE <= x + TANK_SIZE;
                 if (direction == 1) {
-                    if (((yPos <= y + 43) && yPos >= y) && ((xPos <= x + 43 && xPos >= x) ||
-                            (xPos + 43 >= x && xPos + 43 <= x + 43))) {
+                    if (condition1Y && (condition1X || condition2X)) {
                         return true;
                     }
                 } else if (direction == 2) {
-                    if (((xPos + 43 >= x) && xPos + 43 <= x + 43) && ((yPos <= y + 43 & yPos >= y) ||
-                            (yPos + 43 >= y && yPos + 43 <= y + 43))) {
+                    if (condition2X && (condition1Y || condition2Y)) {
                         return true;
                     }
                 } else if (direction == 3) {
-                    if (((yPos + 43 >= y) && yPos + 43 <= y + 43) && ((xPos <= x + 43 && xPos >= x) ||
-                            (xPos + 43 >= x && xPos + 43 <= x + 43))) {
+                    if (condition2Y && (condition1X || condition2X)) {
                         return true;
                     }
                 } else if (direction == 4) {
-                    if (((xPos <= x + 43) && xPos >= x) && ((yPos <= y + 43 && yPos >= y) ||
-                            (yPos + 43 >= y && yPos + 43 <= y + 43))) {
+                    if (condition1X && (condition1Y || condition2Y)) {
                         return true;
                     }
                 }
             }
-
-
-//                if (direction == 1) {
-//                    if (((yPos <= y + minYpos) && yPos >= y) && ((xPos <= x + minXpos && xPos >= x)
-//                            || (xPos + minXpos >= x && xPos + minXpos <= x + minXpos))) {
-//                        return true;
-//                    }
-////                    if((yPos <= minYpos || y >= maxYPos || (Math.abs(yPos - y) <= minYpos)) ||
-////                            (xPos <= minXpos || x >= maxXpos || (Math.abs(xPos - x) <= minXpos))) {
-////                        return true;
-////                    }
-//                } else if (direction == 2) {
-//                    if (((xPos + minXpos >= x) && xPos <= x) && ((yPos <= y + minYpos & yPos >= y) || (yPos + minYpos >= y && yPos + minYpos <= y + minYpos))) {
-//                        return true;
-//                    }
-//                } else if (direction == 3) {
-//                    if (((yPos + minXpos >= y) && yPos <= y) && ((xPos <= x + minXpos && xPos >= x)
-//                            || (xPos + minXpos >= x && xPos <= x))) {
-//                        return true;
-//                    }
-//                } else if (direction == 4) {
-//                    if (((xPos <= x + minXpos) && xPos >= x) && ((yPos <= y + minYpos && yPos >= y)
-//                            || (yPos + minYpos >= y && yPos <= y))) {
-//                        return true;
-//                    }
-//                }
         }
         return false;
     }
