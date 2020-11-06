@@ -165,7 +165,8 @@ public class ClientGuiF extends JFrame implements ActionListener, WindowListener
                 try {
                     msgStr = dis.readUTF();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    System.out.println(e.getMessage());
+                    System.exit(0);
                 }
                 System.out.println(msgStr);
                 if (msgStr.startsWith(Config.typesServerMsg.ID.getType())) {
@@ -183,9 +184,56 @@ public class ClientGuiF extends JFrame implements ActionListener, WindowListener
                     int id = Integer.parseInt(msgStr.substring(pos3 + 1));
                     if (id != tank.getTankID())
                         gameArena.connetNewTank(new Tank(x, y, direction, id));
+                } else if (msgStr.startsWith(Config.typesClientMsg.UPDATE.getType())) {
+                    int pos1 = msgStr.indexOf(',');
+                    int pos2 = msgStr.indexOf('-');
+                    int pos3 = msgStr.indexOf('|');
+                    int x = Integer.parseInt(msgStr.substring(6, pos1));
+                    int y = Integer.parseInt(msgStr.substring(pos1 + 1, pos2));
+                    int dir = Integer.parseInt(msgStr.substring(pos2 + 1, pos3));
+                    int id = Integer.parseInt(msgStr.substring(pos3 + 1, msgStr.length()));
+
+                    if (id != tank.getTankID()) {
+                        gameArena.getTank(id).setPosX(x);
+                        gameArena.getTank(id).setPosY(y);
+                        gameArena.getTank(id).setDirection(dir);
+                        gameArena.repaint();
+                    }
+
+                } else if (msgStr.startsWith(Config.typesClientMsg.SHOT.getType())) {
+                    System.out.println("pui");
+//                    int id = Integer.parseInt(msgStr.substring(4));
+//
+//                    if (id != tank.getTankID()) {
+//                        gameArena.getTank(id).Shot();
+//                    }
+
+                } else if (msgStr.startsWith(Config.typesClientMsg.REMOVE.getType())) {
+                    int id = Integer.parseInt(msgStr.substring(6));
+
+                    if (id == tank.getTankID()) {
+                        int response = JOptionPane.showConfirmDialog(null, "Sorry, You are loss. Do you want to try again ?", "Tanks 2D Multiplayer Game", JOptionPane.OK_CANCEL_OPTION);
+                        if (response == JOptionPane.OK_OPTION) {
+                            //client.closeAll();
+                            setVisible(false);
+                            dispose();
+
+                            new ClientGuiF(); //???
+                        } else {
+                            System.exit(0);
+                        }
+                    } else {
+                        gameArena.removeTank(id);
+                    }
+                } else if (msgStr.startsWith(Config.typesClientMsg.EXIT.getType())) {
+                    int id = Integer.parseInt(msgStr.substring(4));
+
+                    if (id != tank.getTankID()) {
+                        gameArena.removeTank(id);
+                    }
                 }
             }
-            try{
+            try {
                 dis.close();
                 clientSoc.close();
             } catch (IOException e) {

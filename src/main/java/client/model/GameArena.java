@@ -7,6 +7,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class GameArena extends JPanel {
     private Tank tank;
@@ -18,7 +20,7 @@ public class GameArena extends JPanel {
         this.tank = tank;
         this.gameRunning = gameRunning;
         setSize(width, height);
-//        addKeyListener();
+        addKeyListener(new KeyManager(tank));
         setFocusable(true);
 
         tankArr = new ArrayList<>(Config.MAX_PLAYERS);
@@ -38,7 +40,7 @@ public class GameArena extends JPanel {
         g.setColor(Color.BLACK);
         g.fillRect(40, 50, getWidth() - 80, getHeight()); // replace with const
 //        g.drawImage(new ImageIcon("Imgs/background.jpg").getImage(),70,50,null);
-        g.setColor(Color.YELLOW);
+        g.setColor(Color.RED);
         g.setFont(new Font("Comic Sans MS", Font.BOLD, 25));
         g.drawString("TANKS ONLINE", 220, 30);
 

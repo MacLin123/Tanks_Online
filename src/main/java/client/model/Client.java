@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+
 import config.Config.*;
 
 public class Client {
@@ -30,13 +31,19 @@ public class Client {
     }
 
     public void sendToServer(String msg) {
-        if (msg.equals(typesClientMsg.EXIT.getType()))
-            System.exit(0);
-        else {
+        if (msg.startsWith(typesClientMsg.EXIT.getType())) {
             try {
-                Socket s = new Socket(Ip, serverPort);
+                dos.writeUTF(msg);
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+            } finally {
+                System.exit(0);
+            }
+        } else {
+            try {
+//                Socket s = new Socket(Ip, serverPort);
                 System.out.println(msg);
-                dos = new DataOutputStream(s.getOutputStream());
+//                dos = new DataOutputStream(s.getOutputStream());
                 dos.writeUTF(msg);
             } catch (IOException ex) {
 
