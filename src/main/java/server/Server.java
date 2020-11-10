@@ -24,10 +24,10 @@ public class Server extends Thread {
     private boolean isRunning = true;
 
     public Server() {
-        clientDataList = new ArrayList<>(Config.MAX_PLAYERS);
-//        for (int i = 0; i < Config.MAX_PLAYERS; i++) {
-//            clientDataList.add(null);
-//        }
+        clientDataList = new ArrayList<>(Config.MAX_PLAYERS + 1);
+        for (int i = 0; i < Config.MAX_PLAYERS + 1; i++) {
+            clientDataList.add(null);
+        }
         msgProtocol = new MsgProtocol();
         try {
             serverSocket = new ServerSocket(serverPort);

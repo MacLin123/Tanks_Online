@@ -22,8 +22,8 @@ public class GameArena extends JPanel {
         addKeyListener(new KeyManager(tank));
         setFocusable(true);
 
-        tankArr = new ArrayList<>(Config.MAX_PLAYERS);
-        for (int i = 0; i < Config.MAX_PLAYERS; i++) {
+        tankArr = new ArrayList<>(Config.MAX_PLAYERS + 1);
+        for (int i = 0; i < Config.MAX_PLAYERS + 1; i++) {
             tankArr.add(null);
         }
 
