@@ -15,6 +15,8 @@ public class KeyManager implements KeyListener {
     private final int RIGHT = KeyEvent.VK_RIGHT;
     private final int UP = KeyEvent.VK_UP;
     private final int DOWN = KeyEvent.VK_DOWN;
+    private static final long MINIMUM_SHOTS_DELAY = 400; //millis
+    private long lastShotTimeStamp = 0;
     private static int status = 0;
     private MsgProtocol msgProtocol;
 
@@ -42,15 +44,20 @@ public class KeyManager implements KeyListener {
                     tank.getPosY(), tank.getTankID(), tank.getDirection()));
 
         } else if (e.getKeyCode() == DOWN) {
-            tank.goBackward();
+            tank.goBack();
 
             client.sendToServer(msgProtocol.updatePacket(tank.getPosX(),
                     tank.getPosY(), tank.getTankID(), tank.getDirection()));
 
         } else if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-            System.out.println("pi piu");
-//            client.sendToServer(msgProtocol.ShotPacket(tank.getTankID()));
-//            tank.shot();
+            long now = System.currentTimeMillis();
+            if (now - lastShotTimeStamp > MINIMUM_SHOTS_DELAY) {
+                System.out.println("pi piu");
+                client.sendToServer(msgProtocol.shotPacket(tank.getTankID()));
+                tank.myShot();
+
+                lastShotTimeStamp = now;
+            }
         }
     }
 

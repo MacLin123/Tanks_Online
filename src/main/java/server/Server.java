@@ -24,7 +24,10 @@ public class Server extends Thread {
     private boolean isRunning = true;
 
     public Server() {
-        clientDataList = new ArrayList<>();
+        clientDataList = new ArrayList<>(Config.MAX_PLAYERS);
+//        for (int i = 0; i < Config.MAX_PLAYERS; i++) {
+//            clientDataList.add(null);
+//        }
         msgProtocol = new MsgProtocol();
         try {
             serverSocket = new ServerSocket(serverPort);
@@ -42,7 +45,7 @@ public class Server extends Thread {
             try {
                 clientSoc = serverSocket.accept();
                 System.out.println("client has been connected");
-                //hand...
+
                 System.out.println("SIZE = " + clientDataList.size());
                 Thread handlerThread = new Thread(BServerHandler.build(clientSoc, isRunning, clientDataList));
                 handlerThread.start();
@@ -73,7 +76,7 @@ public class Server extends Thread {
 //                }
 //                clientDataList.add(new ClientData(clientDos, x, y, 1));
 //            } else if(msgStr.startsWith(Config.typesClientMsg.EXIT.getType())) {
-//                int id=Integer.parseInt(msgStr.substring(4));
+//                int id=Integer.parseInt(msgStr.substring(s));
 //
 //                try {
 //                    broadcastMsg(msgStr);

@@ -15,16 +15,16 @@ import java.net.Socket;
 
 public class ClientGuiF extends JFrame implements ActionListener, WindowListener {
     private JButton connectBtn;
-    private JPanel mainPanel;
+    private static JPanel mainPanel;
     private JLabel ipLabel;
     private JLabel portLabel;
-    private JLabel scoreLabel;
+    private static JLabel scoreLabel;
     private JTextField ipText;
     private JTextField portText;
     private Client client;
-    private int width = 800, height = 600;
+    private int width = 800, height = 640;
     private int xLoc = 60, yLoc = 100;
-    private int score = 0;
+    private static int score = 0;
     private boolean isRunning = true;
     private GameArena gameArena;
     private Tank tank;
@@ -85,8 +85,13 @@ public class ClientGuiF extends JFrame implements ActionListener, WindowListener
         setVisible(true);
     }
 
-    public static void main(String[] args) {
-        ClientGuiF cgf = new ClientGuiF();
+    public static void setScore(int scoreArg) {
+        score += scoreArg;
+        scoreLabel.setText("Score: " + score);
+    }
+
+    public static JPanel getMainPanel() {
+        return mainPanel;
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -202,11 +207,11 @@ public class ClientGuiF extends JFrame implements ActionListener, WindowListener
 
                 } else if (msgStr.startsWith(Config.typesClientMsg.SHOT.getType())) {
                     System.out.println("pui");
-//                    int id = Integer.parseInt(msgStr.substring(4));
-//
-//                    if (id != tank.getTankID()) {
-//                        gameArena.getTank(id).Shot();
-//                    }
+                    int id = Integer.parseInt(msgStr.substring(4));
+
+                    if (id != tank.getTankID()) {
+                        gameArena.getTank(id).otherShot();
+                    }
 
                 } else if (msgStr.startsWith(Config.typesClientMsg.REMOVE.getType())) {
                     int id = Integer.parseInt(msgStr.substring(6));

@@ -1,5 +1,7 @@
 package client.model;
 
+import config.Config;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -8,7 +10,10 @@ import java.util.Random;
 
 public class Tank {
     private Image[] tankImg;
-    private BufferedImage imgBuf;
+    private BufferedImage bufImg;
+    // 3 - shot\sec, 10s fly time shot(sec)
+    private Bullet bullets[] = new Bullet[Config.MAX_BULLETS];
+    private int curBullet = 0;
     //    private final int RED_TANK_IND = 0;
 //    private final int BLUE_TANK_IND = 4;
     private int tankID;
@@ -23,7 +28,8 @@ public class Tank {
     private int width = 490, height = 510;
     private final int minXpos = 50, minYpos = 60;
     private final int maxXpos = height - minXpos, maxYPos = height - minYpos;
-    private final int TANK_SIZE = 40; //direction == 1
+
+    private static final int TANK_SIZE = 40; // 40x40
 
     public Tank() {
         initCoordRandom();
@@ -36,6 +42,10 @@ public class Tank {
         tankID = id;
         direction = dir;
         loadImage(0);
+    }
+
+    public static int getTankSize() {
+        return TANK_SIZE;
     }
 
     public void initCoordRandom() {
@@ -51,14 +61,14 @@ public class Tank {
         for (int i = val; i < tankImg.length + val; i++) {
             tankImg[i - val] = new ImageIcon("Imgs/" + i + ".png").getImage();
         }
-        imgBuf = new BufferedImage(tankImg[direction - 1].getWidth(null),
+        bufImg = new BufferedImage(tankImg[direction - 1].getWidth(null),
                 tankImg[direction - 1].getHeight(null), BufferedImage.TYPE_INT_RGB);
-        imgBuf.createGraphics().drawImage(tankImg[direction - 1], 0, 0, null);
+        bufImg.createGraphics().drawImage(tankImg[direction - 1], 0, 0, null);
 
     }
 
-    public BufferedImage getImgBuf() {
-        return imgBuf;
+    public BufferedImage getBufImg() {
+        return bufImg;
     }
 
     public int getPosX() {
@@ -86,10 +96,10 @@ public class Tank {
     }
 
     public void setDirection(int direction) {
-        imgBuf = new BufferedImage(tankImg[direction - 1].getWidth(null),
+        bufImg = new BufferedImage(tankImg[direction - 1].getWidth(null),
                 tankImg[direction - 1].getHeight(null),
                 BufferedImage.TYPE_INT_RGB);
-        imgBuf.createGraphics().drawImage(tankImg[direction - 1], 0, 0, null);
+        bufImg.createGraphics().drawImage(tankImg[direction - 1], 0, 0, null);
         this.direction = direction;
     }
 
@@ -137,7 +147,7 @@ public class Tank {
 
     }
 
-    public void goBackward() {
+    public void goBack() {
         if (direction != 3) {
             setDirection(3);
         }
@@ -148,6 +158,27 @@ public class Tank {
         } else if (!isCollision(posX, tmpCoordY)) {
             posY = tmpCoordY;
         }
+    }
+
+    public void myShot() {
+        bullets[curBullet] = new Bullet(this.getPosX(), this.getPosY(), direction);
+
+        bullets[curBullet].startBulletThread(true);
+        curBullet++;
+        if (curBullet % bullets.length == 0) {
+            curBullet = 0;
+        }
+        System.out.println(curBullet);
+    }
+
+    /**
+     * Other player shot
+     */
+    public void otherShot() {
+        bullets[curBullet] = new Bullet(this.getPosX(), this.getPosY(), direction);
+
+        bullets[curBullet].startBulletThread(false);
+        curBullet++;
     }
 
     public boolean isCollision(int xPos, int yPos) {
@@ -182,5 +213,9 @@ public class Tank {
             }
         }
         return false;
+    }
+
+    public Bullet[] getBullets() {
+        return bullets;
     }
 }

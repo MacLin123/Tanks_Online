@@ -8,7 +8,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.List;
 
 public class ServerHandler implements IServerHandler {
@@ -35,10 +34,8 @@ public class ServerHandler implements IServerHandler {
     @Override
     public void run() {
         String msgStr = null; //from client
-        System.out.println("WE ARE IN THE SERVER HANDLER");
         while (isRunning) {
             try {
-                System.out.println("loop");
                 msgStr = clientDis.readUTF();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -118,6 +115,20 @@ public class ServerHandler implements IServerHandler {
         }
     }
 
+//    private int getIndEmptySlot() {
+//        int slot = -1;
+//        for (int i = 0; i < clientDataList.size(); i++) {
+//            if (clientDataList.get(i) == null) {
+//                slot = i;
+//                break;
+//            }
+//        }
+//        if (slot == -1) {
+//            throw new IllegalStateException("Server has max amount of players");
+//        }
+//        return slot;
+//    }
+
     private void handleConnectPacket(String msgStr) {
         int pos = msgStr.indexOf(',');
         int x = Integer.parseInt(msgStr.substring(
@@ -129,15 +140,20 @@ public class ServerHandler implements IServerHandler {
 //        } catch (IOException e) {
 //            e.printStackTrace();
 //        }
-        sendToClient(msgProtocol.getIDPacket(clientDataList.size() + 1));
         try {
-            broadcastMsg(msgProtocol.getNewClientPacket(x, y, 1,
-                    clientDataList.size() + 1));
+//            int id = getIndEmptySlot() + 1;
+            int id = clientDataList.size() + 1;
+            sendToClient(msgProtocol.getIDPacket(id));
+            broadcastMsg(msgProtocol.getNewClientPacket(x, y, 1, id));
             sendAllClientsToSoc(clientDos);
+//            clientDataList.set(id - 1, new Server.ClientData(clientDos, x, y, 1));
+            clientDataList.add(new Server.ClientData(clientDos, x, y, 1));
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
+        } catch (IllegalStateException e) {
+            System.out.println(e.getMessage());
         }
-        clientDataList.add(new Server.ClientData(clientDos, x, y, 1));
+
     }
 
     @Override
