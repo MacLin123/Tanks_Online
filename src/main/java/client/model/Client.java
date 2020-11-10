@@ -5,6 +5,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
+import config.Config;
 import config.Config.*;
 
 public class Client {
@@ -24,6 +25,12 @@ public class Client {
         this.Ip = Ip;
         cs = new Socket(Ip, port);
         dos = new DataOutputStream(cs.getOutputStream());
+
+        dis = new DataInputStream(cs.getInputStream());
+        String receivedMsg = dis.readUTF();
+        if (receivedMsg.startsWith(typesServerMsg.REFUSE_CONNECT.getType())) {
+            throw new IOException(receivedMsg);
+        }
 
         dos.writeUTF(msgProtocol.connectPacket(posX, posY));
 

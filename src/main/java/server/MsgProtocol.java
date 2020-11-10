@@ -11,4 +11,8 @@ public class MsgProtocol {
         return String.format(typesServerMsg.NEWCLIENT.getType()
                 + "%s,%s-%s|%s", x, y, direction, id);
     }
+
+    public String getRefuseConnectionPacket(String cause) {
+        return String.format(typesServerMsg.REFUSE_CONNECT.getType() + " - %s", cause);
+    }
 }

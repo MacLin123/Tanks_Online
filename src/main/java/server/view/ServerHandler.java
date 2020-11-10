@@ -72,8 +72,8 @@ public class ServerHandler implements IServerHandler {
         } catch (IOException ex) {
             ex.printStackTrace();
         }
-        if (clientDataList.get(id - 1) != null)
-            clientDataList.set(id - 1, null);
+        if (clientDataList.get(id) != null)
+            clientDataList.set(id, null);
     }
 
     private void handleRemovePacket(String msgStr) {
@@ -84,7 +84,7 @@ public class ServerHandler implements IServerHandler {
         } catch (IOException ex) {
             ex.printStackTrace();
         }
-        clientDataList.set(id - 1, null);
+        clientDataList.set(id, null);
     }
 
     private void handleShotPacket(String msgStr) {
@@ -103,10 +103,10 @@ public class ServerHandler implements IServerHandler {
         int y = Integer.parseInt(msgStr.substring(pos1 + 1, pos2));
         int dir = Integer.parseInt(msgStr.substring(pos2 + 1, pos3));
         int id = Integer.parseInt(msgStr.substring(pos3 + 1, msgStr.length()));
-        if (clientDataList.get(id - 1) != null) {
-            clientDataList.get(id - 1).setPosX(x);
-            clientDataList.get(id - 1).setPosY(y);
-            clientDataList.get(id - 1).setDirection(dir);
+        if (clientDataList.get(id) != null) {
+            clientDataList.get(id).setPosX(x);
+            clientDataList.get(id).setPosY(y);
+            clientDataList.get(id).setDirection(dir);
             try {
                 broadcastMsg(msgStr);
             } catch (IOException ex) {
@@ -115,19 +115,19 @@ public class ServerHandler implements IServerHandler {
         }
     }
 
-    private int getIndEmptySlot() {
-        int slot = -1;
-        for (int i = 0; i < clientDataList.size(); i++) {
-            if (clientDataList.get(i) == null) {
-                slot = i;
-                break;
-            }
-        }
-        if (slot == -1) {
-            throw new IllegalStateException("Server has max amount of players");
-        }
-        return slot;
-    }
+//    private int getIndEmptySlot() {
+//        int slot = -1;
+//        for (int i = 0; i < clientDataList.size(); i++) {
+//            if (clientDataList.get(i) == null) {
+//                slot = i;
+//                break;
+//            }
+//        }
+//        if (slot == -1) {
+//            throw new IllegalStateException("Server has max amount of players");
+//        }
+//        return slot;
+//    }
 
     private void handleConnectPacket(String msgStr) {
         int pos = msgStr.indexOf(',');
@@ -141,13 +141,13 @@ public class ServerHandler implements IServerHandler {
 //            e.printStackTrace();
 //        }
         try {
-            int id = getIndEmptySlot() + 1;
+            int id = clientDataList.indexOf(null);
 //            int id = clientDataList.size() + 1;
             System.out.println("new client id = " + id);
             sendToClient(msgProtocol.getIDPacket(id));
             broadcastMsg(msgProtocol.getNewClientPacket(x, y, 1, id));
             sendAllClientsToSoc(clientDos);
-            clientDataList.set(id - 1, new Server.ClientData(clientDos, x, y, 1));
+            clientDataList.set(id, new Server.ClientData(clientDos, x, y, 1));
 //            clientDataList.add(new Server.ClientData(clientDos, x, y, 1));
         } catch (IOException e) {
             System.out.println(e.getMessage());
@@ -188,7 +188,7 @@ public class ServerHandler implements IServerHandler {
                 y = clientDataList.get(i).getY();
                 dir = clientDataList.get(i).getDir();
                 try {
-                    dos.writeUTF(msgProtocol.getNewClientPacket(x, y, dir, i + 1));
+                    dos.writeUTF(msgProtocol.getNewClientPacket(x, y, dir, i));
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }

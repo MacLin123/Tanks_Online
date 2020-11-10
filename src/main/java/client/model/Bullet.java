@@ -55,7 +55,7 @@ public class Bullet {
     public boolean isCollision() {
         List<Tank> tanks = GameArena.getTankArr();
         int x, y;
-        for (int i = 1; i < tanks.size(); i++) {
+        for (int i = 0; i < tanks.size(); i++) {
             if (tanks.get(i) != null) {
                 x = tanks.get(i).getPosX();
                 y = tanks.get(i).getPosY();

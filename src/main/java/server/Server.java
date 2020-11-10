@@ -24,8 +24,8 @@ public class Server extends Thread {
     private boolean isRunning = true;
 
     public Server() {
-        clientDataList = new ArrayList<>(Config.MAX_PLAYERS + 1);
-        for (int i = 0; i < Config.MAX_PLAYERS + 1; i++) {
+        clientDataList = new ArrayList<>(Config.MAX_PLAYERS);
+        for (int i = 0; i < Config.MAX_PLAYERS; i++) {
             clientDataList.add(null);
         }
         msgProtocol = new MsgProtocol();
@@ -46,7 +46,16 @@ public class Server extends Thread {
                 clientSoc = serverSocket.accept();
                 System.out.println("client has been connected");
 
-                System.out.println("SIZE = " + clientDataList.size());
+                DataOutputStream respToPlayer =  new DataOutputStream(clientSoc.getOutputStream());
+                if(clientDataList.indexOf(null) == -1) {
+                    respToPlayer.writeUTF(msgProtocol.getRefuseConnectionPacket("Max players on the server"));
+                    respToPlayer.flush();
+                    continue;
+                } else {
+                    respToPlayer.writeUTF("OK");
+                    respToPlayer.flush();
+                }
+
                 Thread handlerThread = new Thread(BServerHandler.build(clientSoc, isRunning, clientDataList));
                 handlerThread.start();
 //                clientDis = new DataInputStream(clientSoc.getInputStream());

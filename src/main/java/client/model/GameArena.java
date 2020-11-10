@@ -22,8 +22,8 @@ public class GameArena extends JPanel {
         addKeyListener(new KeyManager(tank));
         setFocusable(true);
 
-        tankArr = new ArrayList<>(Config.MAX_PLAYERS + 1);
-        for (int i = 0; i < Config.MAX_PLAYERS + 1; i++) {
+        tankArr = new ArrayList<>(Config.MAX_PLAYERS);
+        for (int i = 0; i < Config.MAX_PLAYERS; i++) {
             tankArr.add(null);
         }
 
@@ -54,7 +54,7 @@ public class GameArena extends JPanel {
                     }
                 }
             }
-            for (int i = 1; i < tankArr.size(); i++) {
+            for (int i = 0; i < tankArr.size(); i++) {
                 if (tankArr.get(i) != null)
                     g.drawImage(tankArr.get(i).getBufImg(), tankArr.get(i).getPosX(),
                             tankArr.get(i).getPosY(), this);

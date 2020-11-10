@@ -23,7 +23,8 @@ public class Config {
 
     public enum typesServerMsg {
         NEWCLIENT("NewClient"),
-        ID("Id");
+        ID("Id"),
+        REFUSE_CONNECT("RefuseConnect");
         private String type;
         typesServerMsg(String type) {
             this.type = type;
