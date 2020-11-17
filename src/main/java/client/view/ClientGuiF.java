@@ -25,7 +25,7 @@ public class ClientGuiF extends JFrame implements ActionListener, WindowListener
     private static JLabel scoreLabel;
     private JTextField ipText;
     private JTextField portText;
-    private Client client;
+    private IClient client;
     private int width = 800, height = 640;
     private int xLoc = 60, yLoc = 100;
     private static int score = 0;
@@ -81,7 +81,7 @@ public class ClientGuiF extends JFrame implements ActionListener, WindowListener
 
         client = BClient.getInstance();
         tank = new Tank();
-        gameArena = new GameArena(tank, client, false);
+        gameArena = new GameArena(tank, false);
 
         getContentPane().add(mainPanel);
         getContentPane().add(gameArena);

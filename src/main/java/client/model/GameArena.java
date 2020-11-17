@@ -13,7 +13,7 @@ public class GameArena extends JPanel {
     private static List<Tank> tankArr;
     private boolean gameRunning;
 
-    public GameArena(Tank tank, Client client, boolean gameRunning) {
+    public GameArena(Tank tank, boolean gameRunning) {
         this.tank = tank;
         this.gameRunning = gameRunning;
         setSize(width, height);

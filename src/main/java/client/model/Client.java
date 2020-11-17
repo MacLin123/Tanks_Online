@@ -10,7 +10,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import config.Config.*;
 
-public class Client {
+public class Client implements IClient {
     private Socket cs;
     private String Ip;
     private int serverPort;
@@ -23,6 +23,7 @@ public class Client {
         msgProtocol = new MsgProtocol();
     }
 
+    @Override
     public void connect(String Ip, int port, int posX, int posY) throws IOException {
         this.serverPort = port;
         this.Ip = Ip;
@@ -51,6 +52,7 @@ public class Client {
 
     }
 
+    @Override
     public void sendToServer(String msg) {
         JsonObject msgJson;
         String typeMsg = "";
@@ -80,21 +82,8 @@ public class Client {
 
     }
 
+    @Override
     public Socket getSocket() {
         return cs;
-    }
-
-    public String getIP() {
-        return Ip;
-    }
-
-    public void closeAll() {
-        try {
-            dis.close();
-            dos.close();
-            cs.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 }

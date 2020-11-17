@@ -1,16 +1,13 @@
 package client.controller;
 
-import client.model.BClient;
-import client.model.Client;
-import client.model.MsgProtocol;
-import client.model.Tank;
+import client.model.*;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 public class KeyManager implements KeyListener {
     private Tank tank;
-    private Client client;
+    private IClient client;
     private final int LEFT = KeyEvent.VK_LEFT;
     private final int RIGHT = KeyEvent.VK_RIGHT;
     private final int UP = KeyEvent.VK_UP;

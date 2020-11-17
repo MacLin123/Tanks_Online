@@ -1,9 +1,9 @@
 package client.model;
 
 public class BClient {
-    private static volatile Client instance;
-    public static Client getInstance() {
-        Client result = instance;
+    private static volatile IClient instance;
+    public static IClient getInstance() {
+        IClient result = instance;
         if (result != null) {
             return result;
         }
