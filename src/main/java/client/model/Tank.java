@@ -1,6 +1,5 @@
 package client.model;
 
-import client.controller.GameArena;
 import config.Config;
 
 import javax.swing.*;

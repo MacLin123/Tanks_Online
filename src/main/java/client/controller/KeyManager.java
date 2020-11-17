@@ -1,4 +1,9 @@
-package client.model;
+package client.controller;
+
+import client.model.BClient;
+import client.model.Client;
+import client.model.MsgProtocol;
+import client.model.Tank;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -12,7 +17,6 @@ public class KeyManager implements KeyListener {
     private final int DOWN = KeyEvent.VK_DOWN;
     private static final long MINIMUM_SHOTS_DELAY = 400; //millis
     private long lastShotTimeStamp = 0;
-    private static int status = 0;
     private MsgProtocol msgProtocol;
 
     public KeyManager(Tank tank) {
@@ -47,7 +51,6 @@ public class KeyManager implements KeyListener {
         } else if (e.getKeyCode() == KeyEvent.VK_SPACE) {
             long now = System.currentTimeMillis();
             if (now - lastShotTimeStamp > MINIMUM_SHOTS_DELAY) {
-                System.out.println("pi piu");
                 client.sendToServer(msgProtocol.shotJsonPacket(tank.getTankID()));
                 tank.myShot();
 

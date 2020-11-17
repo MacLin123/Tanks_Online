@@ -1,9 +1,11 @@
-package server.model;
+package server.presenter;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import config.Config;
+import server.model.MsgProtocol;
+import server.model.Server;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -65,13 +67,6 @@ public class ServerHandler implements IServerHandler {
                 break;
             }
         }
-
-        System.out.println("EXIT EXIT EXIT");
-        try {
-            Thread.sleep(10000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         try { //stop client thread
             clientDis.close();
             clientDos.close();
@@ -79,7 +74,6 @@ public class ServerHandler implements IServerHandler {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
     private void handleExitPacket(String msgStr) {
@@ -192,10 +186,5 @@ public class ServerHandler implements IServerHandler {
                 }
             }
         }
-    }
-
-    @Override
-    public void stopServer() {
-        isRunning = false;
     }
 }

@@ -1,6 +1,5 @@
 package client.model;
 
-import client.controller.GameArena;
 import client.view.ClientGuiF;
 
 import java.awt.Image;

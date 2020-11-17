@@ -1,6 +1,6 @@
 package client.view;
 
-import client.controller.GameArena;
+import client.model.GameArena;
 import client.model.*;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;

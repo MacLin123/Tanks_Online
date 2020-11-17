@@ -1,4 +1,6 @@
-package server.model;
+package server.presenter;
+
+import server.model.Server;
 
 import java.net.Socket;
 import java.util.List;

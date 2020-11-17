@@ -1,11 +1,7 @@
-package client.controller;
+package client.model;
 
-
-import client.model.KeyManager;
-import client.model.Client;
-import client.model.Tank;
+import client.controller.KeyManager;
 import config.Config;
-
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
