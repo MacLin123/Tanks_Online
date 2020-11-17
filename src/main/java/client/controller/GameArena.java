@@ -1,7 +1,9 @@
-package client.model;
+package client.controller;
 
 
-import client.model.controller.KeyManager;
+import client.model.KeyManager;
+import client.model.Client;
+import client.model.Tank;
 import config.Config;
 
 import javax.swing.*;

@@ -1,26 +1,48 @@
 package client.model;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import config.Config.*;
 
 public class MsgProtocol {
-    public String connectPacket(int x, int y) {
-        return String.format(typesClientMsg.CONNECT.getType() + "%s,%s", x, y);
+    private Gson gson = new Gson();
+
+    public String connectJsonPacket(int x, int y) {
+        JsonObject conPack = new JsonObject();
+        conPack.addProperty("x", x);
+        conPack.addProperty("y", y);
+        conPack.addProperty("type", typesClientMsg.CONNECT.getType());
+        return conPack.toString();
     }
 
-    public String updatePacket(int x, int y, int id, int dir) {
-        return String.format(typesClientMsg.UPDATE.getType() + "%s,%s-%s|%s"
-                , x, y, dir, id);
+    public String updateJsonPacket(int x, int y, int id, int dir) {
+        JsonObject updPack = new JsonObject();
+        updPack.addProperty("x", x);
+        updPack.addProperty("y", y);
+        updPack.addProperty("id", id);
+        updPack.addProperty("dir", dir);
+        updPack.addProperty("type", typesClientMsg.UPDATE.getType());
+        return updPack.toString();
     }
 
-    public String shotPacket(int id) {
-        return typesClientMsg.SHOT.getType() + id;
+    public String shotJsonPacket(int id) {
+        JsonObject shotPack = new JsonObject();
+        shotPack.addProperty("id", id);
+        shotPack.addProperty("type", typesClientMsg.SHOT.getType());
+        return shotPack.toString();
     }
 
-    public String removeClientPacket(int id) {
-        return typesClientMsg.REMOVE.getType() + id;
+    public String removeClientJsonPacket(int id) {
+        JsonObject removeClientPack = new JsonObject();
+        removeClientPack.addProperty("id", id);
+        removeClientPack.addProperty("type", typesClientMsg.REMOVE.getType());
+        return removeClientPack.toString();
     }
 
-    public String exitMessagePacket(int id) {
-        return typesClientMsg.EXIT.getType() + id;
+    public String exitJsonPacket(int id) {
+        JsonObject exitPack = new JsonObject();
+        exitPack.addProperty("id", id);
+        exitPack.addProperty("type", typesClientMsg.EXIT.getType());
+        return exitPack.toString();
     }
 }

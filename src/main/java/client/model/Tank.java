@@ -1,5 +1,6 @@
 package client.model;
 
+import client.controller.GameArena;
 import config.Config;
 
 import javax.swing.*;
@@ -14,8 +15,6 @@ public class Tank {
     // 3 - shot\sec, 10s fly time shot(sec)
     private Bullet bullets[] = new Bullet[Config.MAX_BULLETS];
     private int curBullet = 0;
-    //    private final int RED_TANK_IND = 0;
-//    private final int BLUE_TANK_IND = 4;
     private int tankID;
     private int posX = -1, posY = -1;
 

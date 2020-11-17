@@ -24,7 +24,8 @@ public class Config {
     public enum typesServerMsg {
         NEWCLIENT("NewClient"),
         ID("Id"),
-        REFUSE_CONNECT("RefuseConnect");
+        REFUSE_CONNECT("RefuseConnect"),
+        OK_CONNECT("OkConnect");
         private String type;
         typesServerMsg(String type) {
             this.type = type;

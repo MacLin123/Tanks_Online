@@ -1,8 +1,9 @@
-package server.view;
+package server.model;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import config.Config;
-import server.MsgProtocol;
-import server.Server;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -17,6 +18,7 @@ public class ServerHandler implements IServerHandler {
     private DataOutputStream clientDos;
     private List<Server.ClientData> clientDataList;
     private MsgProtocol msgProtocol;
+    private Gson gson = new Gson();
 
     public ServerHandler(Socket clientSoc, boolean isRunning, List<Server.ClientData> clientDataList) {
         this.clientSoc = clientSoc;
@@ -38,23 +40,38 @@ public class ServerHandler implements IServerHandler {
             try {
                 msgStr = clientDis.readUTF();
             } catch (IOException e) {
-                e.printStackTrace();
+                System.out.println(e.getMessage());
+                break;
             }
             System.out.println(msgStr);
-            if (msgStr.startsWith(Config.typesClientMsg.CONNECT.getType())) { // connect packet
+            JsonObject msgJson;
+            String typeMsg = "";
+            try {
+                msgJson = gson.fromJson(msgStr, JsonObject.class);
+                typeMsg = msgJson.getAsJsonPrimitive("type").getAsString();
+            } catch (JsonSyntaxException exception) {
+                System.out.println("syntax exception: " + exception.getMessage());
+            }
+            if (typeMsg.equals(Config.typesClientMsg.CONNECT.getType())) {
                 handleConnectPacket(msgStr);
-            } else if (msgStr.startsWith(Config.typesClientMsg.UPDATE.getType())) {
+            } else if (typeMsg.equals(Config.typesClientMsg.UPDATE.getType())) {
                 handleUpdatePacket(msgStr);
-            } else if (msgStr.startsWith(Config.typesClientMsg.SHOT.getType())) {
+            } else if (typeMsg.equals(Config.typesClientMsg.SHOT.getType())) {
                 handleShotPacket(msgStr);
-            } else if (msgStr.startsWith(Config.typesClientMsg.REMOVE.getType())) {
+            } else if (typeMsg.equals(Config.typesClientMsg.REMOVE.getType())) {
                 handleRemovePacket(msgStr);
-            } else if (msgStr.startsWith(Config.typesClientMsg.EXIT.getType())) {
+            } else if (typeMsg.equals(Config.typesClientMsg.EXIT.getType())) {
                 handleExitPacket(msgStr);
                 break;
             }
         }
 
+        System.out.println("EXIT EXIT EXIT");
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         try { //stop client thread
             clientDis.close();
             clientDos.close();
@@ -62,10 +79,12 @@ public class ServerHandler implements IServerHandler {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
     }
 
     private void handleExitPacket(String msgStr) {
-        int id = Integer.parseInt(msgStr.substring(4));
+        JsonObject msgJson = gson.fromJson(msgStr, JsonObject.class);
+        int id = msgJson.getAsJsonPrimitive("id").getAsInt();
 
         try {
             broadcastMsg(msgStr);
@@ -77,7 +96,8 @@ public class ServerHandler implements IServerHandler {
     }
 
     private void handleRemovePacket(String msgStr) {
-        int id = Integer.parseInt(msgStr.substring(6));
+        JsonObject msgJson = gson.fromJson(msgStr, JsonObject.class);
+        int id = msgJson.getAsJsonPrimitive("id").getAsInt();
 
         try {
             broadcastMsg(msgStr);
@@ -96,13 +116,12 @@ public class ServerHandler implements IServerHandler {
     }
 
     private void handleUpdatePacket(String msgStr) {
-        int pos1 = msgStr.indexOf(',');
-        int pos2 = msgStr.indexOf('-');
-        int pos3 = msgStr.indexOf('|');
-        int x = Integer.parseInt(msgStr.substring(6, pos1));
-        int y = Integer.parseInt(msgStr.substring(pos1 + 1, pos2));
-        int dir = Integer.parseInt(msgStr.substring(pos2 + 1, pos3));
-        int id = Integer.parseInt(msgStr.substring(pos3 + 1, msgStr.length()));
+        JsonObject msgJson = gson.fromJson(msgStr, JsonObject.class);
+        int x = msgJson.getAsJsonPrimitive("x").getAsInt();
+        int y = msgJson.getAsJsonPrimitive("y").getAsInt();
+        int id = msgJson.getAsJsonPrimitive("id").getAsInt();
+        int dir = msgJson.getAsJsonPrimitive("dir").getAsInt();
+
         if (clientDataList.get(id) != null) {
             clientDataList.get(id).setPosX(x);
             clientDataList.get(id).setPosY(y);
@@ -115,40 +134,19 @@ public class ServerHandler implements IServerHandler {
         }
     }
 
-//    private int getIndEmptySlot() {
-//        int slot = -1;
-//        for (int i = 0; i < clientDataList.size(); i++) {
-//            if (clientDataList.get(i) == null) {
-//                slot = i;
-//                break;
-//            }
-//        }
-//        if (slot == -1) {
-//            throw new IllegalStateException("Server has max amount of players");
-//        }
-//        return slot;
-//    }
 
     private void handleConnectPacket(String msgStr) {
-        int pos = msgStr.indexOf(',');
-        int x = Integer.parseInt(msgStr.substring(
-                Config.typesClientMsg.CONNECT.getType().length(), pos));
-        int y = Integer.parseInt(msgStr.substring(pos + 1));
+        JsonObject msgJson = gson.fromJson(msgStr, JsonObject.class);
+        int x = msgJson.getAsJsonPrimitive("x").getAsInt();
+        int y = msgJson.getAsJsonPrimitive("y").getAsInt();
 
-//        try {
-//            clientDos = new DataOutputStream(clientSoc.getOutputStream());
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
         try {
             int id = clientDataList.indexOf(null);
-//            int id = clientDataList.size() + 1;
             System.out.println("new client id = " + id);
-            sendToClient(msgProtocol.getIDPacket(id));
-            broadcastMsg(msgProtocol.getNewClientPacket(x, y, 1, id));
+            sendToClient(msgProtocol.getIDJsonPacket(id));
+            broadcastMsg(msgProtocol.getNewClientJsonPacket(x, y, 1, id));
             sendAllClientsToSoc(clientDos);
             clientDataList.set(id, new Server.ClientData(clientDos, x, y, 1));
-//            clientDataList.add(new Server.ClientData(clientDos, x, y, 1));
         } catch (IOException e) {
             System.out.println(e.getMessage());
         } catch (IllegalStateException e) {
@@ -188,7 +186,7 @@ public class ServerHandler implements IServerHandler {
                 y = clientDataList.get(i).getY();
                 dir = clientDataList.get(i).getDir();
                 try {
-                    dos.writeUTF(msgProtocol.getNewClientPacket(x, y, dir, i));
+                    dos.writeUTF(msgProtocol.getNewClientJsonPacket(x, y, dir, i));
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
@@ -200,44 +198,4 @@ public class ServerHandler implements IServerHandler {
     public void stopServer() {
         isRunning = false;
     }
-
-//    public class ClientData {
-//        DataOutputStream dos;
-//        int posX, posY, direction;
-//
-//        public ClientData(DataOutputStream writer, int posX, int posY, int direction) {
-//            this.dos = writer;
-//            this.posX = posX;
-//            this.posY = posY;
-//            this.direction = direction;
-//        }
-//
-//        public void setPosX(int x) {
-//            posX = x;
-//        }
-//
-//        public void setPosY(int y) {
-//            posY = y;
-//        }
-//
-//        public void setDirection(int dir) {
-//            direction = dir;
-//        }
-//
-//        public DataOutputStream getWriterStream() {
-//            return dos;
-//        }
-//
-//        public int getX() {
-//            return posX;
-//        }
-//
-//        public int getY() {
-//            return posY;
-//        }
-//
-//        public int getDir() {
-//            return direction;
-//        }
-//    }
 }

@@ -1,6 +1,10 @@
 package client.view;
 
+import client.controller.GameArena;
 import client.model.*;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import config.Config;
 
 import javax.swing.*;
@@ -125,10 +129,7 @@ public class ClientGuiF extends JFrame implements ActionListener, WindowListener
     }
 
     public void windowClosing(WindowEvent e) {
-        JOptionPane.showConfirmDialog(this,
-                "leaving so soon?", "Tanks_Online",
-                JOptionPane.YES_NO_OPTION);
-        BClient.getInstance().sendToServer(new MsgProtocol().exitMessagePacket(tank.getTankID()));
+        BClient.getInstance().sendToServer(new MsgProtocol().exitJsonPacket(tank.getTankID()));
     }
 
     public void windowClosed(WindowEvent e) {
@@ -152,8 +153,9 @@ public class ClientGuiF extends JFrame implements ActionListener, WindowListener
     }
 
     public class ClientReciever extends Thread {
-        Socket clientSoc;
-        DataInputStream dis;
+        private Socket clientSoc;
+        private DataInputStream dis;
+        private Gson gson = new Gson();
 
         public ClientReciever(Socket clientSoc) {
             this.clientSoc = clientSoc;
@@ -164,78 +166,114 @@ public class ClientGuiF extends JFrame implements ActionListener, WindowListener
             }
         }
 
+        private void handleUpdPacket(String msgStr) {
+            JsonObject msgJson = gson.fromJson(msgStr, JsonObject.class);
+            int x = msgJson.getAsJsonPrimitive("x").getAsInt();
+            int y = msgJson.getAsJsonPrimitive("y").getAsInt();
+            int id = msgJson.getAsJsonPrimitive("id").getAsInt();
+            int dir = msgJson.getAsJsonPrimitive("dir").getAsInt();
+
+            if (id != tank.getTankID()) {
+                gameArena.getTank(id).setPosX(x);
+                gameArena.getTank(id).setPosY(y);
+                gameArena.getTank(id).setDirection(dir);
+                gameArena.repaint();
+            }
+        }
+
+        private void handleShotPacket(String msgStr) {
+            System.out.println("pui");
+            JsonObject msgJson = gson.fromJson(msgStr, JsonObject.class);
+            int id = msgJson.getAsJsonPrimitive("id").getAsInt();
+
+            if (id != tank.getTankID()) {
+                gameArena.getTank(id).otherShot();
+            }
+        }
+
+        private void handleRemovePacket(String msgStr) {
+            JsonObject msgJson = gson.fromJson(msgStr, JsonObject.class);
+            int id = msgJson.getAsJsonPrimitive("id").getAsInt();
+
+            if (id == tank.getTankID()) {
+                int response = JOptionPane.showConfirmDialog(null, "Sorry, You are loss. Do you want to try again ?", "Tanks 2D Multiplayer Game", JOptionPane.OK_CANCEL_OPTION);
+                if (response == JOptionPane.OK_OPTION) {
+                    //client.closeAll();
+                    setVisible(false);
+                    dispose();
+                    new ClientGuiF(); //???
+                } else {
+                    //send exit packet
+                    client.sendToServer(new MsgProtocol().exitJsonPacket(tank.getTankID()));
+                    System.exit(0);
+                }
+            } else {
+                gameArena.removeTank(id);
+            }
+        }
+
+        private void handleExitPacket(String msgStr) {
+            JsonObject msgJson = gson.fromJson(msgStr, JsonObject.class);
+            int id = msgJson.getAsJsonPrimitive("id").getAsInt();
+
+            if (id != tank.getTankID()) {
+                gameArena.removeTank(id);
+            }
+
+        }
+
+        private void handleIdPacket(String msgStr) {
+            JsonObject msgJson = gson.fromJson(msgStr, JsonObject.class);
+            int id = msgJson.getAsJsonPrimitive("id").getAsInt();
+            tank.setTankID(id);
+            System.out.println("Tank id = " + id);
+        }
+
+        private void handleNewClientPacket(String msgStr) {
+            JsonObject msgJson = gson.fromJson(msgStr, JsonObject.class);
+            int id = msgJson.getAsJsonPrimitive("id").getAsInt();
+            int x = msgJson.getAsJsonPrimitive("x").getAsInt();
+            int y = msgJson.getAsJsonPrimitive("y").getAsInt();
+            int direction = msgJson.getAsJsonPrimitive("dir").getAsInt();
+
+            if (id != tank.getTankID())
+                gameArena.connetNewTank(new Tank(x, y, direction, id));
+        }
+
         public void run() {
             String msgStr = "";
             while (isRunning) {
                 try {
                     msgStr = dis.readUTF();
                 } catch (IOException e) {
-                    System.out.println(e.getMessage());
+                    System.out.println(e.getMessage() + " socket problem on client side");
                     System.exit(0);
                 }
                 System.out.println(msgStr);
-                if (msgStr.startsWith(Config.typesServerMsg.ID.getType())) {
-                    int id = Integer.parseInt(msgStr.substring(2));
-                    tank.setTankID(id);
-                    System.out.println("Tank id = " + id);
-                } else if (msgStr.startsWith(Config.typesServerMsg.NEWCLIENT.getType())) { //new tank
-                    int startPos = Config.typesServerMsg.NEWCLIENT.getType().length();
-                    int pos1 = msgStr.indexOf(',');
-                    int pos2 = msgStr.indexOf('-');
-                    int pos3 = msgStr.indexOf('|');
-                    int x = Integer.parseInt(msgStr.substring(startPos, pos1));
-                    int y = Integer.parseInt(msgStr.substring(pos1 + 1, pos2));
-                    int direction = Integer.parseInt(msgStr.substring(pos2 + 1, pos3));
-                    int id = Integer.parseInt(msgStr.substring(pos3 + 1));
-                    if (id != tank.getTankID())
-                        gameArena.connetNewTank(new Tank(x, y, direction, id));
-                } else if (msgStr.startsWith(Config.typesClientMsg.UPDATE.getType())) {
-                    int pos1 = msgStr.indexOf(',');
-                    int pos2 = msgStr.indexOf('-');
-                    int pos3 = msgStr.indexOf('|');
-                    int x = Integer.parseInt(msgStr.substring(6, pos1));
-                    int y = Integer.parseInt(msgStr.substring(pos1 + 1, pos2));
-                    int dir = Integer.parseInt(msgStr.substring(pos2 + 1, pos3));
-                    int id = Integer.parseInt(msgStr.substring(pos3 + 1, msgStr.length()));
 
-                    if (id != tank.getTankID()) {
-                        gameArena.getTank(id).setPosX(x);
-                        gameArena.getTank(id).setPosY(y);
-                        gameArena.getTank(id).setDirection(dir);
-                        gameArena.repaint();
-                    }
+                JsonObject msgJson;
+                String typeMsg = "";
+                try {
+                    msgJson = gson.fromJson(msgStr, JsonObject.class);
+                    typeMsg = msgJson.getAsJsonPrimitive("type").getAsString();
+                } catch (JsonSyntaxException exception) {
+                    System.out.println("syntax exception: " + exception.getMessage());
+                }
 
-                } else if (msgStr.startsWith(Config.typesClientMsg.SHOT.getType())) {
-                    System.out.println("pui");
-                    int id = Integer.parseInt(msgStr.substring(4));
+                if (typeMsg.equals(Config.typesServerMsg.ID.getType())) {
+                    handleIdPacket(msgStr);
+                } else if (typeMsg.equals(Config.typesServerMsg.NEWCLIENT.getType())) { //new tank
+                    handleNewClientPacket(msgStr);
+                } else if (typeMsg.equals(Config.typesClientMsg.UPDATE.getType())) {
+                    handleUpdPacket(msgStr);
 
-                    if (id != tank.getTankID()) {
-                        gameArena.getTank(id).otherShot();
-                    }
+                } else if (typeMsg.equals(Config.typesClientMsg.SHOT.getType())) {
+                    handleShotPacket(msgStr);
 
-                } else if (msgStr.startsWith(Config.typesClientMsg.REMOVE.getType())) {
-                    int id = Integer.parseInt(msgStr.substring(6));
-
-                    if (id == tank.getTankID()) {
-                        int response = JOptionPane.showConfirmDialog(null, "Sorry, You are loss. Do you want to try again ?", "Tanks 2D Multiplayer Game", JOptionPane.OK_CANCEL_OPTION);
-                        if (response == JOptionPane.OK_OPTION) {
-                            //client.closeAll();
-                            setVisible(false);
-                            dispose();
-
-                            new ClientGuiF(); //???
-                        } else {
-                            System.exit(0);
-                        }
-                    } else {
-                        gameArena.removeTank(id);
-                    }
-                } else if (msgStr.startsWith(Config.typesClientMsg.EXIT.getType())) {
-                    int id = Integer.parseInt(msgStr.substring(4));
-
-                    if (id != tank.getTankID()) {
-                        gameArena.removeTank(id);
-                    }
+                } else if (typeMsg.equals(Config.typesClientMsg.REMOVE.getType())) {
+                    handleRemovePacket(msgStr);
+                } else if (typeMsg.equals(Config.typesClientMsg.EXIT.getType())) {
+                    handleExitPacket(msgStr);
                 }
             }
             try {

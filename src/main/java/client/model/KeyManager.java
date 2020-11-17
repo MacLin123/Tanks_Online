@@ -1,9 +1,4 @@
-package client.model.controller;
-
-import client.model.BClient;
-import client.model.Client;
-import client.model.MsgProtocol;
-import client.model.Tank;
+package client.model;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -31,29 +26,29 @@ public class KeyManager implements KeyListener {
         if (e.getKeyCode() == LEFT) {
             tank.goLeft();
 
-            client.sendToServer(msgProtocol.updatePacket(tank.getPosX(),
+            client.sendToServer(msgProtocol.updateJsonPacket(tank.getPosX(),
                     tank.getPosY(), tank.getTankID(), tank.getDirection()));
         } else if (e.getKeyCode() == RIGHT) {
             tank.goRight();
-            client.sendToServer(msgProtocol.updatePacket(tank.getPosX(),
+            client.sendToServer(msgProtocol.updateJsonPacket(tank.getPosX(),
                     tank.getPosY(), tank.getTankID(), tank.getDirection()));
 
         } else if (e.getKeyCode() == UP) {
             tank.goForward();
-            client.sendToServer(msgProtocol.updatePacket(tank.getPosX(),
+            client.sendToServer(msgProtocol.updateJsonPacket(tank.getPosX(),
                     tank.getPosY(), tank.getTankID(), tank.getDirection()));
 
         } else if (e.getKeyCode() == DOWN) {
             tank.goBack();
 
-            client.sendToServer(msgProtocol.updatePacket(tank.getPosX(),
+            client.sendToServer(msgProtocol.updateJsonPacket(tank.getPosX(),
                     tank.getPosY(), tank.getTankID(), tank.getDirection()));
 
         } else if (e.getKeyCode() == KeyEvent.VK_SPACE) {
             long now = System.currentTimeMillis();
             if (now - lastShotTimeStamp > MINIMUM_SHOTS_DELAY) {
                 System.out.println("pi piu");
-                client.sendToServer(msgProtocol.shotPacket(tank.getTankID()));
+                client.sendToServer(msgProtocol.shotJsonPacket(tank.getTankID()));
                 tank.myShot();
 
                 lastShotTimeStamp = now;

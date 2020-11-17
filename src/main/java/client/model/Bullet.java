@@ -1,5 +1,6 @@
 package client.model;
 
+import client.controller.GameArena;
 import client.view.ClientGuiF;
 
 import java.awt.Image;
@@ -73,7 +74,7 @@ public class Bullet {
                     }
                     if (tanks.get(i) != null)
                         BClient.getInstance().sendToServer((new MsgProtocol())
-                                .removeClientPacket(tanks.get(i).getTankID()));
+                                .removeClientJsonPacket(tanks.get(i).getTankID()));
 
                     return true;
                 }

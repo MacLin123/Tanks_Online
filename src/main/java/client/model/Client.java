@@ -5,7 +5,9 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
-import config.Config;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import config.Config.*;
 
 public class Client {
@@ -15,6 +17,7 @@ public class Client {
     private DataInputStream dis;
     private DataOutputStream dos;
     private MsgProtocol msgProtocol;
+    private Gson gson = new Gson();
 
     public Client() {
         msgProtocol = new MsgProtocol();
@@ -28,29 +31,47 @@ public class Client {
 
         dis = new DataInputStream(cs.getInputStream());
         String receivedMsg = dis.readUTF();
-        if (receivedMsg.startsWith(typesServerMsg.REFUSE_CONNECT.getType())) {
-            throw new IOException(receivedMsg);
+
+        JsonObject msgJson = null;
+        String typeMsg = "";
+        try {
+            msgJson = gson.fromJson(receivedMsg, JsonObject.class);
+            typeMsg = msgJson.getAsJsonPrimitive("type").getAsString();
+        } catch (JsonSyntaxException exception) {
+            System.out.println("syntax exception: " + exception.getMessage());
         }
 
-        dos.writeUTF(msgProtocol.connectPacket(posX, posY));
+        if (typeMsg.equals(typesServerMsg.REFUSE_CONNECT.getType())) {
+            String cause = msgJson.getAsJsonPrimitive("cause").getAsString();
+            throw new IOException(cause);
+        }
+
+        dos.writeUTF(msgProtocol.connectJsonPacket(posX, posY));
 
 
     }
 
     public void sendToServer(String msg) {
-        if (msg.startsWith(typesClientMsg.EXIT.getType())) {
+        JsonObject msgJson;
+        String typeMsg = "";
+        try {
+            msgJson = gson.fromJson(msg, JsonObject.class);
+            typeMsg = msgJson.getAsJsonPrimitive("type").getAsString();
+        } catch (JsonSyntaxException exception) {
+            System.out.println("syntax exception: " + exception.getMessage());
+        }
+
+        if (typeMsg.equals(typesClientMsg.EXIT.getType())) {
             try {
-                dos.writeUTF(msg);
+                if (dos != null) {
+                    dos.writeUTF(msg);
+                }
             } catch (IOException e) {
                 System.out.println(e.getMessage());
-            } finally {
-                System.exit(0);
             }
         } else {
             try {
-//                Socket s = new Socket(Ip, serverPort);
                 System.out.println(msg);
-//                dos = new DataOutputStream(s.getOutputStream());
                 dos.writeUTF(msg);
             } catch (IOException ex) {
 

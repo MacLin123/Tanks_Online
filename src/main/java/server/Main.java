@@ -1,6 +1,6 @@
 package server;
 
-import java.util.ArrayList;
+import server.model.Server;
 
 public class Main {
     public static void main(String[] args) {
