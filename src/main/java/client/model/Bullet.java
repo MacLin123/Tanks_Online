@@ -1,6 +1,6 @@
 package client.model;
 
-import client.view.ClientGuiF;
+import client.view.BClientGuiF;
 
 import java.awt.Image;
 import java.awt.image.BufferedImage;
@@ -62,9 +62,11 @@ public class Bullet {
 
                 if ((posY >= y && posY <= y + Tank.getTankSize()) && (posX >= x && posX <= x + Tank.getTankSize())) {
 
-                    ClientGuiF.setScore(50);
+//                    ClientGuiF.setScore(1);
+                    BClientGuiF.getInstance().addScoreFromServer();
 
-                    ClientGuiF.getMainPanel().repaint();
+//                    ClientGuiF.getMainPanel().repaint();
+
 
                     try {
                         Thread.sleep(200);

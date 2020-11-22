@@ -7,10 +7,12 @@ import config.Config.*;
 public class MsgProtocol {
     private Gson gson = new Gson();
 
-    public String connectJsonPacket(int x, int y) {
+    public String connectJsonPacket(int x, int y, String username, String password) {
         JsonObject conPack = new JsonObject();
         conPack.addProperty("x", x);
         conPack.addProperty("y", y);
+        conPack.addProperty("username",username);
+        conPack.addProperty("password",password);
         conPack.addProperty("type", typesClientMsg.CONNECT.getType());
         return conPack.toString();
     }
@@ -44,5 +46,25 @@ public class MsgProtocol {
         exitPack.addProperty("id", id);
         exitPack.addProperty("type", typesClientMsg.EXIT.getType());
         return exitPack.toString();
+    }
+    public String addScorePacket(int id) {
+        JsonObject addScorePack = new JsonObject();
+        addScorePack.addProperty("id", id);
+        addScorePack.addProperty("type", typesClientMsg.ADDSCORE.getType());
+        return addScorePack.toString();
+    }
+    public String registerPacket(String username, String password) {
+        JsonObject addScorePack = new JsonObject();
+        addScorePack.addProperty("username", username);
+        addScorePack.addProperty("password", password);
+        addScorePack.addProperty("type", typesClientMsg.REGISTER.getType());
+        return addScorePack.toString();
+    }
+    public String logInPacket(String username,String password) {
+        JsonObject logInPack = new JsonObject();
+        logInPack.addProperty("username", username);
+        logInPack.addProperty("password", password);
+        logInPack.addProperty("type", typesClientMsg.LOGIN.getType());
+        return logInPack.toString();
     }
 }

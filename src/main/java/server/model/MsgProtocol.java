@@ -34,4 +34,30 @@ public class MsgProtocol {
         okConPacket.addProperty("type", typesServerMsg.OK_CONNECT.getType());
         return okConPacket.toString();
     }
+    public String getScoreAddedPacket(int score) {
+        JsonObject scoreAdded = new JsonObject();
+        scoreAdded.addProperty("score", score);
+        scoreAdded.addProperty("type", typesServerMsg.SCORE_ADDED.getType());
+        return scoreAdded.toString();
+    }
+    public String leadersUpdatePacket(String leadersJson) {
+        JsonObject scoreAdded = new JsonObject();
+        scoreAdded.addProperty("leadersJson", leadersJson);
+        scoreAdded.addProperty("type", typesServerMsg.LEADERS_UPDATE.getType());
+        return scoreAdded.toString();
+    }
+    public String registerResponsePacket(boolean success,String info) {
+        JsonObject regPack = new JsonObject();
+        regPack.addProperty("success", success);
+        regPack.addProperty("info", info);
+        regPack.addProperty("type", typesServerMsg.REGISTER.getType());
+        return regPack.toString();
+    }
+    public String loginResponsePacket(boolean success,String info) {
+        JsonObject logPack = new JsonObject();
+        logPack.addProperty("success", success);
+        logPack.addProperty("info", info);
+        logPack.addProperty("type", typesServerMsg.LOGIN.getType());
+        return logPack.toString();
+    }
 }

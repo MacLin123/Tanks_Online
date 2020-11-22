@@ -71,13 +71,20 @@ public class Server extends Thread {
 
     public static class ClientData {
         DataOutputStream dos;
-        int posX, posY, direction;
+        int posX, posY, direction, score;
+        String username;
 
-        public ClientData(DataOutputStream writer, int posX, int posY, int direction) {
+        public ClientData(DataOutputStream writer, int posX, int posY, int direction, String username) {
             this.dos = writer;
             this.posX = posX;
             this.posY = posY;
             this.direction = direction;
+            this.username = username;
+            setScore(0);
+        }
+
+        public String getUsername() {
+            return username;
         }
 
         public void setPosX(int x) {
@@ -106,6 +113,19 @@ public class Server extends Thread {
 
         public int getDir() {
             return direction;
+        }
+
+        public int getScore() {
+            return score;
+        }
+
+        public void setScore(int score) {
+            this.score = score;
+        }
+
+        public int addAndGetScore(int additionalScore) {
+            setScore(getScore() + additionalScore);
+            return getScore();
         }
     }
 }

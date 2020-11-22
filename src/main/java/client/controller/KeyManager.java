@@ -26,7 +26,6 @@ public class KeyManager implements KeyListener {
     public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == LEFT) {
             tank.goLeft();
-
             client.sendToServer(msgProtocol.updateJsonPacket(tank.getPosX(),
                     tank.getPosY(), tank.getTankID(), tank.getDirection()));
         } else if (e.getKeyCode() == RIGHT) {

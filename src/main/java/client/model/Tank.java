@@ -50,8 +50,6 @@ public class Tank {
         Random random = new Random();
         posX = random.nextInt(maxXpos - minXpos) + minXpos;
         posY = random.nextInt(maxYPos - minYpos) + minYpos;
-
-        //CheckCollision??
     }
 
     public void loadImage(int val) {
@@ -181,6 +179,9 @@ public class Tank {
 
     public boolean isCollision(int xPos, int yPos) {
         List<Tank> tanks = GameArena.getTankArr();
+        if (tanks == null) {
+            return false;
+        }
         int x, y;
         for (int i = 0; i < tanks.size(); i++) { // from one because id starts with one
             if (tanks.get(i) != null) {
